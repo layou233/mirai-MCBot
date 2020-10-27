@@ -1,35 +1,37 @@
 package layou233.mcbot.mojang.apiRequester
 
-import okhttp3.OkHttpClient
+import layou233.mcbot.httpClient.client
 import okhttp3.Request
-import java.lang.Exception
-import java.util.concurrent.TimeUnit
+import java.net.SocketTimeoutException
+import java.util.Base64.getDecoder
 
-val client = OkHttpClient.Builder()
-    .connectTimeout(10000, TimeUnit.MILLISECONDS)
-    .readTimeout(3000, TimeUnit.MILLISECONDS)
-    .addInterceptor {
-        return@addInterceptor it.proceed(
-            it.request().newBuilder()
-                .addHeader(
-                    "User-Agent",
-                    ""
-                )
-                .build()
-        )
-    }
-    .build()
-/*
 fun uuid(id: String): String? {
-    TODO("Have not start yet")
-    return try
+    try {
         val response =
             client.newCall(Request.Builder().url("https://api.mojang.com/users/profiles/minecraft/$id").build())
                 .execute()
-        val found: String = Regex("\\\":.*?(?=[,.}])").find(response.toString()).toString()
+        val back: String = response.body!!.string()
         response.close()
-        found
-    } catch (e: Exception) {
-    return null
+        return back.substring(17 + id.length, back.length - 2)
+    } catch (e: SocketTimeoutException) {
+        return null
+    }
 }
-}*/
+
+fun resource(uuid: String?): String? {
+    if (uuid==null) return null
+    else{
+        try {
+            val response =
+                client.newCall(Request.Builder().url("https://sessionserver.mojang.com/session/minecraft/profile/$uuid")
+                    .build())
+                    .execute()
+            val back: String = response.body!!.string().replace("\\s".toRegex(), "")
+            response.close()
+            val res: String = Regex("""value\":\".*=+""").find(back)!!.value.substring(8)
+            return String(getDecoder().decode(res)).replace("\\s".toRegex(), "")
+        } catch (e: SocketTimeoutException) {
+            return null
+        }}
+
+}
