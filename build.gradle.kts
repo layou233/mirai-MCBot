@@ -3,7 +3,7 @@ plugins {
     kotlin("jvm") version kotlinVersion
     kotlin("plugin.serialization") version kotlinVersion
 //    id("application")
-    id("net.mamoe.mirai-console") version "2.4-M1"
+    id("net.mamoe.mirai-console") version "2.4.0"
 }
 
 group = "layou233.mcbot"
